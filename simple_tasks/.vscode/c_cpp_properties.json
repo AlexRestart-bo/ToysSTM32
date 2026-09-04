@@ -4,19 +4,18 @@
             "name": "STM32",
             "includePath": [
                 "${workspaceFolder}/**",
+                "${workspaceFolder}/mplayer/firmware/core/inc",
                 "/usr/lib/arm-none-eabi/include",
-                "/usr/lib/gcc/arm-none-eabi/14.2.1/include",
-                "/usr/include"
+                "/usr/lib/gcc/arm-none-eabi/14.2.1/include"
             ],
             "defines": [
-                "STM32F103xB",
-                "USE_HAL_DRIVER"
+                "STM32F103xB"
             ],
             "compilerPath": "/usr/bin/arm-none-eabi-gcc",
             "cStandard": "c11",
             "cppStandard": "c++17",
             "intelliSenseMode": "linux-gcc-arm",
-            "configurationProvider": "ms-vscode.cmake-tools"
+            "configurationProvider": "ms-vscode.cpptools"
         }
     ],
     "version": 4
