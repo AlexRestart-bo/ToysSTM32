@@ -4,6 +4,7 @@ CC = $(PREFIX)gcc
 AS = $(PREFIX)gcc -x assembler-with-cpp
 CP = $(PREFIX)objcopy
 SZ = $(PREFIX)size
+DB = $(PREFIX)gdb
 
 # Microcontroller
 MCU = -mcpu=cortex-m3 -mthumb
@@ -16,11 +17,7 @@ ROOT = .
 CORE = $(ROOT)/core
 
 # Source files
-C_SOURCES = \
-$(CORE)/src/main.c \
-$(CORE)/src/system_stm32f1xx.c \
-$(CORE)/src/melodies.c 
-#$(CORE)/src/usart.c 
+C_SOURCES = $(wildcard $(CORE)/src/*.c)
 
 # ASM sources
 ASM_SOURCES = \
@@ -49,9 +46,6 @@ BUILD_DIR = build
 
 # Default target
 all: $(BUILD_DIR)/$(TARGET).bin $(BUILD_DIR)/$(TARGET).hex
-
-# Create build directory
-
 
 # Compile C files
 OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(C_SOURCES:.c=.o)))
@@ -87,5 +81,8 @@ clean:
 # Flash with ST-Link
 flash: $(BUILD_DIR)/$(TARGET).bin
 	st-flash --connect-under-reset --reset write $< 0x8000000
+
+debug:
+	$(DB) $(BUILD_DIR)/$(TARGET).elf
 
 .PHONY: all clean flash

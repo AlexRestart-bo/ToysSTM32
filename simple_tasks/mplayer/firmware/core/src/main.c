@@ -31,13 +31,16 @@ int main(void) {
     set_note(C4);
     while(1) {
         // It is a melody from "melodies.c"
-        play_marmot();
+        //play_marmot();
+        for (volatile int i = 0; i < 1000000; i++);
+
+        GPIOC->ODR ^= GPIO_ODR_ODR13;
     }
 }
 
 void Enable_Clocks(void){
     // GPIO clocks
-    RCC->APB2ENR |= RCC_APB2ENR_IOPAEN;     // PORT A base on APB 
+    RCC->APB2ENR |= RCC_APB2ENR_IOPAEN | RCC_APB2ENR_IOPCEN;     // PORT A base on APB 
     RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;     // enable TIM2 clock
 }
     
@@ -46,6 +49,9 @@ void GPIO_Config(void){
     GPIOA->CRL |= (GPIO_CRL_MODE0_1 | GPIO_CRL_MODE0_0);    // Output mode, max speed 50 MHz
     GPIOA->CRL |= GPIO_CRL_CNF0_1;                          // Alternate function output
     GPIOA->CRL &= ~GPIO_CRL_CNF0_0;                         // Push-Pull for PWM
+
+    GPIOC->CRH &= ~(GPIO_CRH_MODE13 | GPIO_CRH_CNF13);
+    GPIOC->CRH |= GPIO_CRH_MODE13_1;                        // Output mode, max speed 50 MHz, push-pull
 }
 
 void TIM2_Init(void){
