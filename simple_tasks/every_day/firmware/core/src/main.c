@@ -16,6 +16,9 @@
 void Enable_Clocks(void);
 void GPIO_Config(void);
 void TIM1_Init(void);
+void SysTick_Init(void);
+
+int waiting_microseconds(unsigned int mcs);
 
 int main(void) {
     RCC_config();
@@ -23,9 +26,11 @@ int main(void) {
     GPIO_Config();
     TIM1_Init();
 
+    SysTick_Init();
+
     while(1){
-        for (volatile int i = 0; i < 1000000; i++);
-        //GPIOC->ODR ^= GPIO_ODR_ODR13;
+        waiting_microseconds(100'000'000);
+        GPIOC->ODR ^= GPIO_ODR_ODR13;
     }
 }
 
@@ -52,7 +57,67 @@ void TIM1_Init(void){
 
 void TIM1_UP_IRQHandler(void){
     TIM1->SR &= ~(TIM_SR_UIF);
-    GPIOC->ODR ^= GPIO_ODR_ODR13;
+    //GPIOC->ODR ^= GPIO_ODR_ODR13;
 }
 
+void SysTick_Init(void){
+    /* In this configuration AHB frequency the same system frequency generates PLL (72 MHz) */
+    SysTick->LOAD = BOARD_SYSCLK / MICROINSEC - 1;
+    /* Clock source is AHB without prescaler */
+    SysTick->CTRL |= SysTick_CTRL_CLKSOURCE_Msk;
 
+    SysTick->VAL = 0;
+    
+    SysTick->CTRL &= ~SysTick_CTRL_TICKINT_Msk;
+}
+
+/*
+static int powint(int a, int b){
+    int out = 1;
+    if (b < 0) return -1;
+    
+    while (b--){
+        out *= a; 
+    }
+
+    return out;
+}
+*/
+
+int waiting_microseconds(unsigned int mcs){
+    /* Max value for 24-bit register 2^24-1 */
+    unsigned long load_value = SYSTICK_TICKS_PER_US*mcs;
+
+    unsigned int total_period = 0;
+    unsigned int fract_period = mcs;    /* temporary all in fract_period */
+
+    if (load_value > SYSTICK_MAX){
+        total_period = fract_period / MILIINSEC;        /* Number of miliseconds */
+        fract_period = fract_period % MILIINSEC;        /* Number of microseconds */
+    }
+
+    while(total_period--){
+        /* BOARD_SYSCLK / MICROINSEC = 72000000 / 1000000 = 72 for AHB frequency 72 MHz */
+        SysTick->LOAD = SYSTICK_TICKS_PER_MS;
+        /* Turns counter on */
+        SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
+        /* If timer counted to 0 it became 1 (COUNTFLAG) */
+        while((SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk) != SysTick_CTRL_COUNTFLAG_Msk);
+        (void)SysTick->CTRL;
+        /* Turns counter off */
+        SysTick->CTRL &= ~SysTick_CTRL_ENABLE_Msk;
+    }
+    /* BOARD_SYSCLK / MICROINSEC = 72000000 / 1000000 = 72 for AHB frequency 72 MHz */
+    SysTick->LOAD = fract_period*SYSTICK_TICKS_PER_US;
+    /* Turns counter on */
+    SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
+    /* If timer counted to 0 it became 1 (COUNTFLAG) */
+    while((SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk) != SysTick_CTRL_COUNTFLAG_Msk);
+    (void)SysTick->CTRL;
+    /* Turns counter off */
+    SysTick->CTRL &= ~SysTick_CTRL_ENABLE_Msk;
+
+    SysTick->LOAD = 0;
+
+    return 0;
+}

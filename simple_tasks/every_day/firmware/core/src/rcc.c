@@ -18,15 +18,15 @@ void RCC_config(void)
     RCC->CFGR |= RCC_CFGR_PLLSRC;
     RCC->CFGR |= RCC_CFGR_PLLMULL9;
     
-    /* Turn PLL on */
+    /* Turns PLL on */
     RCC->CR |= RCC_CR_PLLON;
 
-    /* Wait PLL is stable */
+    /* Waits PLL is stable */
     while (!(RCC->CR & RCC_CR_PLLRDY));
     
     /* Configure prescalers for the buses */
     RCC->CFGR |= RCC_CFGR_HPRE_DIV1;      // AHB = SYSCLK / 1 = 72 MHz
-    RCC->CFGR |= RCC_CFGR_PPRE1_DIV2;     // APB1 = AHB / 2 = 36 MHz (max = 36 МГц)
+    RCC->CFGR |= RCC_CFGR_PPRE1_DIV2;     // APB1 = AHB / 2 = 36 MHz (max = 36 MHz)
     RCC->CFGR |= RCC_CFGR_PPRE2_DIV1;     // APB2 = AHB / 1 = 72 MHz
     
     /* Switch system clock on PLL */

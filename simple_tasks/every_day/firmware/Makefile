@@ -28,7 +28,7 @@ C_INCLUDES = \
 -I$(CORE)/inc/
 
 # Compiler flags
-CFLAGS = $(MCU) $(OPT) -std=gnu11 \
+CFLAGS = $(MCU) $(OPT) -std=gnu23 \
 -DSTM32F103xB \
 $(C_INCLUDES) \
 -ffunction-sections -fdata-sections \
@@ -38,7 +38,7 @@ $(C_INCLUDES) \
 LDFLAGS = $(MCU) -T"$(CORE)/STM32F103C8TX_FLASH.ld" \
 --specs=nosys.specs \
 -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref \
--Wl,--gc-sections
+-Wl,--gc-sections -lm
 
 # Output files
 TARGET = firmware
@@ -80,7 +80,7 @@ clean:
 
 # Flash with ST-Link
 flash: $(BUILD_DIR)/$(TARGET).bin
-	st-flash --connect-under-reset --reset write $< 0x8000000
+	st-flash --reset write $< 0x8000000
 
 debug:
 	$(DB) $(BUILD_DIR)/$(TARGET).elf

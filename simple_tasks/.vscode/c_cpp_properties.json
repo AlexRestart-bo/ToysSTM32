@@ -4,7 +4,7 @@
             "name": "STM32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/mplayer/firmware/core/inc",
+                "${workspaceFolder}/every_day/firmware/core/inc",
                 "/usr/lib/arm-none-eabi/include",
                 "/usr/lib/gcc/arm-none-eabi/14.2.1/include"
             ],
