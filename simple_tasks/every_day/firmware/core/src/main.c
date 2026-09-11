@@ -19,6 +19,7 @@ void TIM1_Init(void);
 void SysTick_Init(void);
 
 int waiting_microseconds(unsigned int mcs);
+static void run_lights(void);
 
 int main(void) {
     RCC_config();
@@ -29,19 +30,34 @@ int main(void) {
     SysTick_Init();
 
     while(1){
-        waiting_microseconds(100'000'000);
-        GPIOC->ODR ^= GPIO_ODR_ODR13;
+        //waiting_microseconds(100'000'000);
+        //GPIOC->ODR ^= GPIO_ODR_ODR13;
+        run_lights();
     }
 }
 
 void Enable_Clocks(void){
-    // GPIO clocks
-    RCC->APB2ENR |= RCC_APB2ENR_TIM1EN | RCC_APB2ENR_IOPCEN;     // enable TIM1 and GPIOC clock
+    /* Enable TIM1, GPIOC  and GPIOA clock */
+    RCC->APB2ENR |= RCC_APB2ENR_TIM1EN | RCC_APB2ENR_IOPAEN; // | RCC_APB2ENR_IOPCEN 
 }
-    
+
+/**
+ * @brief Configurates GPIOs
+ * @note PC13 can be configurated as open drain (it is at the board - Blue Pill), any other demands push-pull for LEDs
+ */
 void GPIO_Config(void){
     GPIOC->CRH &= ~(GPIO_CRH_MODE13 | GPIO_CRH_CNF13);      // Cleans bits PC13 in register CRH
-    GPIOC->CRH |= (GPIO_CRH_MODE13_1 | GPIO_CRH_MODE13_0);  // Output mode, max speed 2 MHz, push-pull
+    GPIOC->CRH |= (GPIO_CRH_MODE13_1 | GPIO_CRH_MODE13_0);  // Output mode, max speed 10 MHz, open drain
+    // PA0
+    GPIOA->CRL &= ~(GPIO_CRL_MODE0 | GPIO_CRL_CNF0);
+    GPIOA->CRL |= GPIO_CRL_MODE0_1;
+    // PA1
+    GPIOA->CRL &= ~(GPIO_CRL_MODE1 | GPIO_CRL_CNF1);
+    GPIOA->CRL |= GPIO_CRL_MODE1_1;
+    // PA2
+    GPIOA->CRL &= ~(GPIO_CRL_MODE2 | GPIO_CRL_CNF2);
+    GPIOA->CRL |= GPIO_CRL_MODE2_1;
+
 }
 
 void TIM1_Init(void){
@@ -120,4 +136,40 @@ int waiting_microseconds(unsigned int mcs){
     SysTick->LOAD = 0;
 
     return 0;
+}
+
+/**
+ * @brief Torches LEDs consistantly (touches PA0, PA1, PA2)
+ *      LEDs are connected in series with resistors (330)
+ */
+static void run_lights(void){
+    static uint8_t led_order = 0;
+
+    switch (led_order)
+    {
+    case 0:
+        CLEAR_BIT(GPIOA->ODR, GPIO_ODR_ODR1);
+        CLEAR_BIT(GPIOA->ODR, GPIO_ODR_ODR2);
+        SET_BIT(GPIOA->ODR, GPIO_ODR_ODR0);
+        break;
+
+    case 1:
+        CLEAR_BIT(GPIOA->ODR, GPIO_ODR_ODR0);
+        CLEAR_BIT(GPIOA->ODR, GPIO_ODR_ODR2);
+        SET_BIT(GPIOA->ODR, GPIO_ODR_ODR1);
+        break;
+
+    case 2:
+        CLEAR_BIT(GPIOA->ODR, GPIO_ODR_ODR0);
+        CLEAR_BIT(GPIOA->ODR, GPIO_ODR_ODR1);
+        SET_BIT(GPIOA->ODR, GPIO_ODR_ODR2);
+        break;
+
+    default:
+        break;
+    }
+
+    led_order = (led_order + 1) % LEDS;
+
+    waiting_microseconds(300'000);
 }

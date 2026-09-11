@@ -22,6 +22,8 @@
 #define SYSTICK_TICKS_PER_US (BOARD_SYSCLK/MICROINSEC)      /* Ticks per microsecond (72) */
 #define SYSTICK_TICKS_PER_MS (BOARD_SYSCLK/MILIINSEC)       /* Ticks per milisecond (72000) */
 
+#define LEDS 3      /* Number of LEDs at the board */
+
 
 #define SYSTICK_MAX 0xFFFFFF    /* The limit for 24-bit register */
 
