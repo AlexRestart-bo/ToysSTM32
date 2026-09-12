@@ -15,17 +15,19 @@ OPT = -Og
 # Paths
 ROOT = .
 CORE = $(ROOT)/core
+DRIV = $(ROOT)/drivers
 
 # Source files
 C_SOURCES = $(wildcard $(CORE)/src/*.c)
+C_SOURCES += $(wildcard $(DRIV)/src/*.c)
 
 # ASM sources
 ASM_SOURCES = \
-$(CORE)/startup/startup_stm32f103xb.s
+$(DRIV)/startup/startup_stm32f103xb.s
 
 # Include paths
-C_INCLUDES = \
--I$(CORE)/inc/
+INCLUDE_DIRS = $(DRIV)/inc $(CORE)/inc
+C_INCLUDES = $(foreach d, $(INCLUDE_DIRS), -I$(d))
 
 # Compiler flags
 CFLAGS = $(MCU) $(OPT) -std=gnu23 \
@@ -35,7 +37,7 @@ $(C_INCLUDES) \
 -Wall -fstack-usage --specs=nano.specs
 
 # Linker flags
-LDFLAGS = $(MCU) -T"$(CORE)/STM32F103C8TX_FLASH.ld" \
+LDFLAGS = $(MCU) -T"$(DRIV)/STM32F103C8TX_FLASH.ld" \
 --specs=nosys.specs \
 -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref \
 -Wl,--gc-sections -lm

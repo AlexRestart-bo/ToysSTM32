@@ -15,6 +15,7 @@
 #include "stm32f1xx.h"
 #include "stm32f103xb.h"
 #include "system_stm32f1xx.h"
+#include "clock_utils.h"
 
 #define BOARD_SYSCLK 72000000   /* SYSCLK configured as 72 MHz */
 #define MICROINSEC 1000000      /* Number microseconds in a second */

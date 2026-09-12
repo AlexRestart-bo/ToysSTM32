@@ -12,6 +12,7 @@
 #define PSC_VALUE 10000         // Timer prescaler: 1 MHz / 1000 = 1 kHz timer clock
 #define ARR_VALUE 7200          // Auto-reload: if SYSCLK = 72 MHz (APB2 -> TIM1)
 
+enum {OFF = 0, ON = 1};
 
 void Enable_Clocks(void);
 void GPIO_Config(void);
@@ -20,6 +21,7 @@ void SysTick_Init(void);
 
 int waiting_microseconds(unsigned int mcs);
 static void run_lights(void);
+static void button_check(void);
 
 int main(void) {
     RCC_config();
@@ -30,15 +32,21 @@ int main(void) {
     SysTick_Init();
 
     while(1){
-        //waiting_microseconds(100'000'000);
+        //waiting_microseconds(30'000'000);
         //GPIOC->ODR ^= GPIO_ODR_ODR13;
         run_lights();
+        //button_check();
     }
 }
 
 void Enable_Clocks(void){
     /* Enable TIM1, GPIOC  and GPIOA clock */
-    RCC->APB2ENR |= RCC_APB2ENR_TIM1EN | RCC_APB2ENR_IOPAEN; // | RCC_APB2ENR_IOPCEN 
+    RCC->APB2ENR |= RCC_APB2ENR_TIM1EN | RCC_APB2ENR_IOPAEN | RCC_APB2ENR_IOPCEN;
+}
+
+void EXTI_Config(){
+    EXTI->EMR |= EXTI_EMR_EM3;
+    EXTI->FTSR |= EXTI_FTSR_FT3;
 }
 
 /**
@@ -57,6 +65,10 @@ void GPIO_Config(void){
     // PA2
     GPIOA->CRL &= ~(GPIO_CRL_MODE2 | GPIO_CRL_CNF2);
     GPIOA->CRL |= GPIO_CRL_MODE2_1;
+    // PA3
+    GPIOA->CRL &= ~(GPIO_CRL_MODE3 | GPIO_CRL_CNF3);
+    GPIOA->CRL |= GPIO_CRL_CNF3_1;      // Input mode
+    GPIOA->ODR |= GPIO_ODR_ODR3;        // pull-up
 
 }
 
@@ -85,57 +97,6 @@ void SysTick_Init(void){
     SysTick->VAL = 0;
     
     SysTick->CTRL &= ~SysTick_CTRL_TICKINT_Msk;
-}
-
-/*
-static int powint(int a, int b){
-    int out = 1;
-    if (b < 0) return -1;
-    
-    while (b--){
-        out *= a; 
-    }
-
-    return out;
-}
-*/
-
-int waiting_microseconds(unsigned int mcs){
-    /* Max value for 24-bit register 2^24-1 */
-    unsigned long load_value = SYSTICK_TICKS_PER_US*mcs;
-
-    unsigned int total_period = 0;
-    unsigned int fract_period = mcs;    /* temporary all in fract_period */
-
-    if (load_value > SYSTICK_MAX){
-        total_period = fract_period / MILIINSEC;        /* Number of miliseconds */
-        fract_period = fract_period % MILIINSEC;        /* Number of microseconds */
-    }
-
-    while(total_period--){
-        /* BOARD_SYSCLK / MICROINSEC = 72000000 / 1000000 = 72 for AHB frequency 72 MHz */
-        SysTick->LOAD = SYSTICK_TICKS_PER_MS;
-        /* Turns counter on */
-        SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
-        /* If timer counted to 0 it became 1 (COUNTFLAG) */
-        while((SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk) != SysTick_CTRL_COUNTFLAG_Msk);
-        (void)SysTick->CTRL;
-        /* Turns counter off */
-        SysTick->CTRL &= ~SysTick_CTRL_ENABLE_Msk;
-    }
-    /* BOARD_SYSCLK / MICROINSEC = 72000000 / 1000000 = 72 for AHB frequency 72 MHz */
-    SysTick->LOAD = fract_period*SYSTICK_TICKS_PER_US;
-    /* Turns counter on */
-    SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
-    /* If timer counted to 0 it became 1 (COUNTFLAG) */
-    while((SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk) != SysTick_CTRL_COUNTFLAG_Msk);
-    (void)SysTick->CTRL;
-    /* Turns counter off */
-    SysTick->CTRL &= ~SysTick_CTRL_ENABLE_Msk;
-
-    SysTick->LOAD = 0;
-
-    return 0;
 }
 
 /**
@@ -172,4 +133,57 @@ static void run_lights(void){
     led_order = (led_order + 1) % LEDS;
 
     waiting_microseconds(300'000);
+}
+
+/**
+ * @brief Turns LED (PA2) on if button is pressed
+ * 
+ *      It checks the button a few times and does intermissions among them
+ */
+static void button_check(void){
+    static int status = OFF;
+
+    if (!(GPIOA->IDR & GPIO_IDR_IDR3) && status == OFF){
+        int checker = 1;
+        waiting_microseconds(20);
+
+        if (!(GPIOA->IDR & GPIO_IDR_IDR3))
+            checker++;
+        waiting_microseconds(20);
+
+        if (!(GPIOA->IDR & GPIO_IDR_IDR3))
+            checker++;
+        waiting_microseconds(20);
+
+        if (!(GPIOA->IDR & GPIO_IDR_IDR3))
+            checker++;
+        waiting_microseconds(20);
+
+        if (!(GPIOA->IDR & GPIO_IDR_IDR3) && checker >= 4){
+            SET_BIT(GPIOA->ODR, GPIO_ODR_ODR2);
+            status = ON;
+        }
+    }
+
+    if ((GPIOA->IDR & GPIO_IDR_IDR3) && status == ON){
+        int checker = 1;
+        waiting_microseconds(20);
+
+        if (GPIOA->IDR & GPIO_IDR_IDR3)
+            checker++;
+        waiting_microseconds(20);
+
+        if (GPIOA->IDR & GPIO_IDR_IDR3)
+            checker++;
+        waiting_microseconds(20);
+
+        if (GPIOA->IDR & GPIO_IDR_IDR3)
+            checker++;
+        waiting_microseconds(20);
+
+        if ((GPIOA->IDR & GPIO_IDR_IDR3) && checker >= 4){
+            CLEAR_BIT(GPIOA->ODR, GPIO_ODR_ODR2);
+            status = OFF;
+        }
+    }
 }
