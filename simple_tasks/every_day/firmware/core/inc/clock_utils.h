@@ -10,6 +10,26 @@
 #ifndef CLOCK_UTILS_H
 #define CLOCK_UTILS_H
 
+#define DELAY_FOR_RATTLE 10000      /* Delay in a rattle for detecting pressing */
+#define DELAY_FOR_RATTLE_MS 10      /* Miliseconds */
+#define CHECKING_TIMES 4            /* Every event from a button is checked four times */
+
+/**
+ * @brief Stores variables for handling of a button pressing
+ * @note Delay time is expressed in miliseconds and demands a corresponding configuration TIM1.
+ *  It uses TIM1 for doing a delay.
+ */
+typedef struct {
+    unsigned char efforts;          /* Quantity times when button was checked */
+    unsigned char retentions;       /* Quantity statuses when button is pressed */
+    unsigned int delay_time;        /* Duration of a delay between checkings (in miliseconds) */
+    unsigned int ticks;             /* Every miliseconds increments this variable */
+    ButtonStatus status;            /* Is it turned OFF or ON */
+    enum lock {wantON = 0, wantOFF = 1, nothing = 2} lock_type;  /* A lock for cheching one condition */
+} buttonHandler;
+
+extern buttonHandler button2_handler;
+
 /**
  * @brief Delays the program by microseconds
  * 
@@ -18,5 +38,7 @@
  * @note It is not related to interruptions and does not affect their operation
  */
 int waiting_microseconds(unsigned int mcs);
+
+void button_check(void);
 
 #endif

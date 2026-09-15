@@ -9,49 +9,60 @@
 
 #include "main.h"
 
-#define PSC_VALUE 10000         // Timer prescaler: 1 MHz / 1000 = 1 kHz timer clock
-#define ARR_VALUE 7200          // Auto-reload: if SYSCLK = 72 MHz (APB2 -> TIM1)
-
-enum {OFF = 0, ON = 1};
-
 void Enable_Clocks(void);
 void GPIO_Config(void);
 void TIM1_Init(void);
 void SysTick_Init(void);
+void EXTI_Config(void);
 
-int waiting_microseconds(unsigned int mcs);
 static void run_lights(void);
-static void button_check(void);
+
+/* Status of the buttons: true - pressed, false - no pressed */
+volatile bool button1_event = false;
+volatile bool button2_event = false;
 
 int main(void) {
     RCC_config();
     Enable_Clocks();
     GPIO_Config();
     TIM1_Init();
-
+    EXTI_Config();
     SysTick_Init();
 
     while(1){
-        //waiting_microseconds(30'000'000);
+        //waiting_microseconds(1'000'000);
         //GPIOC->ODR ^= GPIO_ODR_ODR13;
-        run_lights();
-        //button_check();
+        //run_lights();
+        if (button1_event){      /* good approach for handling a pressing the button */
+            button1_event = false;
+            button_check();
+        }
     }
 }
 
 void Enable_Clocks(void){
     /* Enable TIM1, GPIOC  and GPIOA clock */
-    RCC->APB2ENR |= RCC_APB2ENR_TIM1EN | RCC_APB2ENR_IOPAEN | RCC_APB2ENR_IOPCEN;
+    RCC->APB2ENR |= RCC_APB2ENR_TIM1EN | RCC_APB2ENR_IOPAEN | RCC_APB2ENR_IOPCEN | RCC_APB2ENR_AFIOEN;
 }
 
-void EXTI_Config(){
-    EXTI->EMR |= EXTI_EMR_EM3;
-    EXTI->FTSR |= EXTI_FTSR_FT3;
+/**
+ * @brief Prepares extern lines for handling a button pressing
+ * @note Triggers callback on rising and falling events. PA3 connects with button1, PA4 connects with PA4
+ */
+void EXTI_Config(void){
+    EXTI->FTSR |= EXTI_FTSR_FT3 | EXTI_FTSR_FT4;
+    EXTI->RTSR |= EXTI_RTSR_RT3 | EXTI_RTSR_RT4;
+    AFIO->EXTICR[0] &= ~AFIO_EXTICR1_EXTI3;        /* AFIO_EXTICR1 needs for to choose source input for interrupt EXTI (PA3) */
+    AFIO->EXTICR[1] &= ~AFIO_EXTICR2_EXTI4;
+    EXTI->IMR |= EXTI_IMR_IM3 | EXTI_IMR_IM4;
+    //NVIC_SetPriority(EXTI3_IRQn, 2);
+    NVIC_EnableIRQ(EXTI3_IRQn);
+    NVIC_EnableIRQ(EXTI4_IRQn);
 }
 
 /**
  * @brief Configurates GPIOs
- * @note PC13 can be configurated as open drain (it is at the board - Blue Pill), any other demands push-pull for LEDs
+ * @note PC13 can be configurated as open drain (it is at the board - Blue Pill), any other demands push-pull for LEDs.
  */
 void GPIO_Config(void){
     GPIOC->CRH &= ~(GPIO_CRH_MODE13 | GPIO_CRH_CNF13);      // Cleans bits PC13 in register CRH
@@ -70,22 +81,6 @@ void GPIO_Config(void){
     GPIOA->CRL |= GPIO_CRL_CNF3_1;      // Input mode
     GPIOA->ODR |= GPIO_ODR_ODR3;        // pull-up
 
-}
-
-void TIM1_Init(void){
-    TIM1->ARR = ARR_VALUE - 1;
-    TIM1->PSC = PSC_VALUE - 1;
-    TIM1->DIER = TIM_DIER_UIE;
-    TIM1->SR &= ~TIM_SR_UIF;
-    TIM1->CNT = 0;
-    TIM1->CR1 = TIM_CR1_CEN;
-    NVIC_SetPriority(TIM1_UP_IRQn, 1);
-    NVIC_EnableIRQ(TIM1_UP_IRQn);
-}
-
-void TIM1_UP_IRQHandler(void){
-    TIM1->SR &= ~(TIM_SR_UIF);
-    //GPIOC->ODR ^= GPIO_ODR_ODR13;
 }
 
 void SysTick_Init(void){
@@ -135,55 +130,3 @@ static void run_lights(void){
     waiting_microseconds(300'000);
 }
 
-/**
- * @brief Turns LED (PA2) on if button is pressed
- * 
- *      It checks the button a few times and does intermissions among them
- */
-static void button_check(void){
-    static int status = OFF;
-
-    if (!(GPIOA->IDR & GPIO_IDR_IDR3) && status == OFF){
-        int checker = 1;
-        waiting_microseconds(20);
-
-        if (!(GPIOA->IDR & GPIO_IDR_IDR3))
-            checker++;
-        waiting_microseconds(20);
-
-        if (!(GPIOA->IDR & GPIO_IDR_IDR3))
-            checker++;
-        waiting_microseconds(20);
-
-        if (!(GPIOA->IDR & GPIO_IDR_IDR3))
-            checker++;
-        waiting_microseconds(20);
-
-        if (!(GPIOA->IDR & GPIO_IDR_IDR3) && checker >= 4){
-            SET_BIT(GPIOA->ODR, GPIO_ODR_ODR2);
-            status = ON;
-        }
-    }
-
-    if ((GPIOA->IDR & GPIO_IDR_IDR3) && status == ON){
-        int checker = 1;
-        waiting_microseconds(20);
-
-        if (GPIOA->IDR & GPIO_IDR_IDR3)
-            checker++;
-        waiting_microseconds(20);
-
-        if (GPIOA->IDR & GPIO_IDR_IDR3)
-            checker++;
-        waiting_microseconds(20);
-
-        if (GPIOA->IDR & GPIO_IDR_IDR3)
-            checker++;
-        waiting_microseconds(20);
-
-        if ((GPIOA->IDR & GPIO_IDR_IDR3) && checker >= 4){
-            CLEAR_BIT(GPIOA->ODR, GPIO_ODR_ODR2);
-            status = OFF;
-        }
-    }
-}

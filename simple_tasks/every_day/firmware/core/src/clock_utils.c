@@ -1,5 +1,7 @@
 #include "main.h"
 
+buttonHandler button2_handler = {0, 0, 0, DELAY_FOR_RATTLE_MS, OFF, nothing};
+
 /**
  * @brief Delays the program by microseconds
  * 
@@ -47,4 +49,61 @@ int waiting_microseconds(unsigned int mcs){
     SysTick->LOAD = 0;
 
     return 0;
+}
+
+int delay_by_tim1(unsigned int ms){
+
+}
+
+/**
+ * @brief Turns LED (PA2) on if button is pressed
+ * 
+ *      It checks the button a few times and does intermissions among them
+ */
+void button_check(void){
+    static int status = OFF;
+
+    if (!(GPIOA->IDR & GPIO_IDR_IDR3) && status == OFF){
+        int checker = 1;
+        waiting_microseconds(DELAY_FOR_RATTLE);
+
+        if (!(GPIOA->IDR & GPIO_IDR_IDR3))
+            checker++;
+        waiting_microseconds(DELAY_FOR_RATTLE);
+
+        if (!(GPIOA->IDR & GPIO_IDR_IDR3))
+            checker++;
+        waiting_microseconds(DELAY_FOR_RATTLE);
+
+        if (!(GPIOA->IDR & GPIO_IDR_IDR3))
+            checker++;
+        waiting_microseconds(DELAY_FOR_RATTLE);
+
+        if (!(GPIOA->IDR & GPIO_IDR_IDR3) && checker >= CHECKING_TIMES){
+            SET_BIT(GPIOA->ODR, GPIO_ODR_ODR2);
+            status = ON;
+        }
+    }
+
+    if ((GPIOA->IDR & GPIO_IDR_IDR3) && status == ON){
+        int checker = 1;
+        waiting_microseconds(DELAY_FOR_RATTLE);
+
+        if (GPIOA->IDR & GPIO_IDR_IDR3)
+            checker++;
+        waiting_microseconds(DELAY_FOR_RATTLE);
+
+        if (GPIOA->IDR & GPIO_IDR_IDR3)
+            checker++;
+        waiting_microseconds(DELAY_FOR_RATTLE);
+
+        if (GPIOA->IDR & GPIO_IDR_IDR3)
+            checker++;
+        waiting_microseconds(DELAY_FOR_RATTLE);
+
+        if ((GPIOA->IDR & GPIO_IDR_IDR3) && checker >= CHECKING_TIMES){
+            CLEAR_BIT(GPIOA->ODR, GPIO_ODR_ODR2);
+            status = OFF;
+        }
+    }
 }
