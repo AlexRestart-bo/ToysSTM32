@@ -37,6 +37,12 @@ int main(void) {
             button1_event = false;
             button_check();
         }
+
+        if (button2_event){
+            button2_event = false;
+            button_check();
+            
+        }
     }
 }
 

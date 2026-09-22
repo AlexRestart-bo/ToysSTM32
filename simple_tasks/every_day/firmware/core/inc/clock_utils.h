@@ -14,6 +14,7 @@
 #define DELAY_FOR_RATTLE_MS 10      /* Miliseconds */
 #define CHECKING_TIMES 4            /* Every event from a button is checked four times */
 
+typedef enum {OFF = 0, ON = 1} ButtonStatus;
 /**
  * @brief Stores variables for handling of a button pressing
  * @note Delay time is expressed in miliseconds and demands a corresponding configuration TIM1.

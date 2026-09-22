@@ -29,6 +29,9 @@ void TIM1_UP_IRQHandler(void){
             button2_handler.lock_type = wantOFF;
             button2_handler.ticks = 0;
         }
+
+        //if(button2_handler.lock_type == nothing)    /* Stop iterrupts for reducing the load with CPU */
+            //NVIC_DisableIRQ(TIM1_UP_IRQn);
         break;
     case wantON:
         button2_handler.ticks++;
@@ -80,7 +83,7 @@ void EXTI3_IRQHandler(void){
 }
 
 /* Second button (to PA4) has been pressed */
-void EXTI3_IRQHandler(void){
+void EXTI4_IRQHandler(void){
     if(EXTI->PR & EXTI_PR_PR4){
         button2_event = true;
         EXTI->PR = EXTI_PR_PR4;

@@ -51,9 +51,11 @@ int waiting_microseconds(unsigned int mcs){
     return 0;
 }
 
+/*
 int delay_by_tim1(unsigned int ms){
 
 }
+*/
 
 /**
  * @brief Turns LED (PA2) on if button is pressed

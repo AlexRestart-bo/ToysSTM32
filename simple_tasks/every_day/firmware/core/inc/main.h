@@ -31,8 +31,6 @@
 
 #define SYSTICK_MAX 0xFFFFFF    /* The limit for 24-bit register */
 
-typedef enum {OFF = 0, ON = 1} ButtonStatus;
-
 /* Status of the button: true - pressed, false - no pressed */
 extern volatile bool button1_event; 
 extern volatile bool button2_event;
