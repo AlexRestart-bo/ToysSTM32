@@ -60,51 +60,51 @@ int delay_by_tim1(unsigned int ms){
 /**
  * @brief Turns LED (PA2) on if button is pressed
  * 
- *      It checks the button a few times and does intermissions among them
+ *      It checks the button a few times and does intermissions among them  GPIO_IDR_IDR3   (GPIOA->IDR & GPIO_IDR_IDR3)    GPIOA->ODR, GPIO_ODR_ODR2
  */
-void button_check(void){
+void button_check(uint32_t* button_reg, uint32_t* led_reg, uint32_t button_bit, uint32_t led_bit){
     static int status = OFF;
 
-    if (!(GPIOA->IDR & GPIO_IDR_IDR3) && status == OFF){
+    if (!(*button_reg & button_bit) && status == OFF){
         int checker = 1;
         waiting_microseconds(DELAY_FOR_RATTLE);
 
-        if (!(GPIOA->IDR & GPIO_IDR_IDR3))
+        if (!(*button_reg & button_bit))
             checker++;
         waiting_microseconds(DELAY_FOR_RATTLE);
 
-        if (!(GPIOA->IDR & GPIO_IDR_IDR3))
+        if (!(*button_reg & button_bit))
             checker++;
         waiting_microseconds(DELAY_FOR_RATTLE);
 
-        if (!(GPIOA->IDR & GPIO_IDR_IDR3))
+        if (!(*button_reg & button_bit))
             checker++;
         waiting_microseconds(DELAY_FOR_RATTLE);
 
-        if (!(GPIOA->IDR & GPIO_IDR_IDR3) && checker >= CHECKING_TIMES){
-            SET_BIT(GPIOA->ODR, GPIO_ODR_ODR2);
+        if (!(*button_reg & button_bit) && checker >= CHECKING_TIMES){
+            SET_BIT(*led_reg, led_bit);
             status = ON;
         }
     }
 
-    if ((GPIOA->IDR & GPIO_IDR_IDR3) && status == ON){
+    if ((*button_reg & button_bit) && status == ON){
         int checker = 1;
         waiting_microseconds(DELAY_FOR_RATTLE);
 
-        if (GPIOA->IDR & GPIO_IDR_IDR3)
+        if (*button_reg & button_bit)
             checker++;
         waiting_microseconds(DELAY_FOR_RATTLE);
 
-        if (GPIOA->IDR & GPIO_IDR_IDR3)
+        if (*button_reg & button_bit)
             checker++;
         waiting_microseconds(DELAY_FOR_RATTLE);
 
-        if (GPIOA->IDR & GPIO_IDR_IDR3)
+        if (*button_reg & button_bit)
             checker++;
         waiting_microseconds(DELAY_FOR_RATTLE);
 
-        if ((GPIOA->IDR & GPIO_IDR_IDR3) && checker >= CHECKING_TIMES){
-            CLEAR_BIT(GPIOA->ODR, GPIO_ODR_ODR2);
+        if ((*button_reg & button_bit) && checker >= CHECKING_TIMES){
+            CLEAR_BIT(*led_reg, led_bit);
             status = OFF;
         }
     }

@@ -7,8 +7,8 @@ void TIM1_Init(void){       // 1 kHz
     TIM1->SR &= ~TIM_SR_UIF;
     TIM1->CNT = 0;
     TIM1->CR1 = TIM_CR1_CEN;
-    //NVIC_SetPriority(TIM1_UP_IRQn, 1);
-    //NVIC_EnableIRQ(TIM1_UP_IRQn);
+    NVIC_SetPriority(TIM1_UP_IRQn, 1);
+    NVIC_EnableIRQ(TIM1_UP_IRQn);
 }
 
 void TIM2_Init(void){

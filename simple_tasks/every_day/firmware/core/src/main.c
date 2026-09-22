@@ -35,12 +35,12 @@ int main(void) {
         //run_lights();
         if (button1_event){      /* good approach for handling a pressing the button */
             button1_event = false;
-            button_check();
+            button_check(&GPIOA->IDR, &GPIOA->ODR, GPIO_IDR_IDR3, GPIO_ODR_ODR2);
         }
 
         if (button2_event){
             button2_event = false;
-            button_check();
+            //button_check(&GPIOA->IDR, &GPIOA->ODR, GPIO_IDR_IDR4, GPIO_ODR_ODR1);
             
         }
     }
@@ -86,6 +86,10 @@ void GPIO_Config(void){
     GPIOA->CRL &= ~(GPIO_CRL_MODE3 | GPIO_CRL_CNF3);
     GPIOA->CRL |= GPIO_CRL_CNF3_1;      // Input mode
     GPIOA->ODR |= GPIO_ODR_ODR3;        // pull-up
+    // PA4
+    GPIOA->CRL &= ~(GPIO_CRL_MODE4 | GPIO_CRL_CNF4);
+    GPIOA->CRL |= GPIO_CRL_CNF4_1;      // Input mode
+    GPIOA->ODR |= GPIO_ODR_ODR4;        // pull-up
 
 }
 

@@ -40,6 +40,6 @@ extern buttonHandler button2_handler;
  */
 int waiting_microseconds(unsigned int mcs);
 
-void button_check(void);
+void button_check(uint32_t* button_reg, uint32_t* led_reg, uint32_t button_bit, uint32_t led_bit);
 
 #endif

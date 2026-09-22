@@ -18,7 +18,7 @@ unsigned long long ticks_tim1 = 0;
  */
 void TIM1_UP_IRQHandler(void){
     TIM1->SR &= ~(TIM_SR_UIF);
-
+    /**/
     switch (button2_handler.lock_type){
     case nothing:
         if (!READ_BIT(GPIOA->IDR, GPIO_IDR_IDR4) && button2_handler.status == OFF) {    /* Checks was it turned off before and is it pressed */
