@@ -27,8 +27,10 @@ typedef struct {
     unsigned int ticks;             /* Every miliseconds increments this variable */
     ButtonStatus status;            /* Is it turned OFF or ON */
     enum lock {wantON = 0, wantOFF = 1, nothing = 2} lock_type;  /* A lock for cheching one condition */
+    bool ischanged;                 /* It's possibly the status was changed */
 } buttonHandler;
 
+extern buttonHandler button1_handler;
 extern buttonHandler button2_handler;
 
 /**

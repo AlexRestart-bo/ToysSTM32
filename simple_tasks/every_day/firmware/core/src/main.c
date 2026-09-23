@@ -33,16 +33,16 @@ int main(void) {
         //waiting_microseconds(1'000'000);
         //GPIOC->ODR ^= GPIO_ODR_ODR13;
         //run_lights();
-        if (button1_event){      /* good approach for handling a pressing the button */
-            button1_event = false;
-            button_check(&GPIOA->IDR, &GPIOA->ODR, GPIO_IDR_IDR3, GPIO_ODR_ODR2);
-        }
+        //if (button1_event){      /* good approach for handling a pressing the button */
+        //    button1_event = false;
+        //    button_check(&GPIOA->IDR, &GPIOA->ODR, GPIO_IDR_IDR3, GPIO_ODR_ODR2);
+        //}
 
-        if (button2_event){
-            button2_event = false;
+        //if (button2_event){
+        //    button2_event = false;
             //button_check(&GPIOA->IDR, &GPIOA->ODR, GPIO_IDR_IDR4, GPIO_ODR_ODR1);
             
-        }
+        //}
     }
 }
 
@@ -56,14 +56,15 @@ void Enable_Clocks(void){
  * @note Triggers callback on rising and falling events. PA3 connects with button1, PA4 connects with PA4
  */
 void EXTI_Config(void){
-    EXTI->FTSR |= EXTI_FTSR_FT3 | EXTI_FTSR_FT4;
-    EXTI->RTSR |= EXTI_RTSR_RT3 | EXTI_RTSR_RT4;
-    AFIO->EXTICR[0] &= ~AFIO_EXTICR1_EXTI3;        /* AFIO_EXTICR1 needs for to choose source input for interrupt EXTI (PA3) */
-    AFIO->EXTICR[1] &= ~AFIO_EXTICR2_EXTI4;
-    EXTI->IMR |= EXTI_IMR_IM3 | EXTI_IMR_IM4;
+    EXTI->FTSR |= EXTI_FTSR_FT5 | EXTI_FTSR_FT6;
+    EXTI->RTSR |= EXTI_RTSR_RT5 | EXTI_RTSR_RT6;
+    //AFIO->EXTICR[0] &= ~AFIO_EXTICR1_EXTI3;        /* AFIO_EXTICR1 needs for to choose source input for interrupt EXTI (PA3) */
+    //AFIO->EXTICR[1] &= ~AFIO_EXTICR2_EXTI4;
+    AFIO->EXTICR[1] &= ~(AFIO_EXTICR2_EXTI5 | AFIO_EXTICR2_EXTI6);
+    EXTI->IMR |= EXTI_IMR_IM5 | EXTI_IMR_IM6;
     //NVIC_SetPriority(EXTI3_IRQn, 2);
-    NVIC_EnableIRQ(EXTI3_IRQn);
-    NVIC_EnableIRQ(EXTI4_IRQn);
+    NVIC_EnableIRQ(EXTI9_5_IRQn);
+    //NVIC_EnableIRQ(EXTI4_IRQn);
 }
 
 /**
@@ -73,23 +74,31 @@ void EXTI_Config(void){
 void GPIO_Config(void){
     GPIOC->CRH &= ~(GPIO_CRH_MODE13 | GPIO_CRH_CNF13);      // Cleans bits PC13 in register CRH
     GPIOC->CRH |= (GPIO_CRH_MODE13_1 | GPIO_CRH_MODE13_0);  // Output mode, max speed 10 MHz, open drain
-    // PA0
+    // PA0  -   RED LED
     GPIOA->CRL &= ~(GPIO_CRL_MODE0 | GPIO_CRL_CNF0);
     GPIOA->CRL |= GPIO_CRL_MODE0_1;
-    // PA1
+    // PA1  -   BLUE LED
     GPIOA->CRL &= ~(GPIO_CRL_MODE1 | GPIO_CRL_CNF1);
     GPIOA->CRL |= GPIO_CRL_MODE1_1;
-    // PA2
+    // PA2  -   YELLOW LED
     GPIOA->CRL &= ~(GPIO_CRL_MODE2 | GPIO_CRL_CNF2);
     GPIOA->CRL |= GPIO_CRL_MODE2_1;
     // PA3
-    GPIOA->CRL &= ~(GPIO_CRL_MODE3 | GPIO_CRL_CNF3);
-    GPIOA->CRL |= GPIO_CRL_CNF3_1;      // Input mode
-    GPIOA->ODR |= GPIO_ODR_ODR3;        // pull-up
+    //GPIOA->CRL &= ~(GPIO_CRL_MODE3 | GPIO_CRL_CNF3);
+    //GPIOA->CRL |= GPIO_CRL_CNF3_1;      // Input mode
+    //GPIOA->ODR |= GPIO_ODR_ODR3;        // pull-up
     // PA4
-    GPIOA->CRL &= ~(GPIO_CRL_MODE4 | GPIO_CRL_CNF4);
-    GPIOA->CRL |= GPIO_CRL_CNF4_1;      // Input mode
-    GPIOA->ODR |= GPIO_ODR_ODR4;        // pull-up
+    //GPIOA->CRL &= ~(GPIO_CRL_MODE4 | GPIO_CRL_CNF4);
+    //GPIOA->CRL |= GPIO_CRL_CNF4_1;      // Input mode
+    //GPIOA->ODR |= GPIO_ODR_ODR4;        // pull-up
+    // PA5  -   BUTTON1
+    GPIOA->CRL &= ~(GPIO_CRL_MODE5 | GPIO_CRL_CNF5);
+    GPIOA->CRL |= GPIO_CRL_CNF5_1;
+    GPIOA->ODR |= GPIO_ODR_ODR5;
+    // PA6  -   BUTTON2
+    GPIOA->CRL &= ~(GPIO_CRL_MODE6 | GPIO_CRL_CNF6);
+    GPIOA->CRL |= GPIO_CRL_CNF6_1;
+    GPIOA->ODR |= GPIO_ODR_ODR6;
 
 }
 
