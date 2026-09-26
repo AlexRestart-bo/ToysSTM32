@@ -11,7 +11,6 @@
 
 void Enable_Clocks(void);
 void GPIO_Config(void);
-void TIM1_Init(void);
 void SysTick_Init(void);
 void EXTI_Config(void);
 
@@ -26,6 +25,7 @@ int main(void) {
     Enable_Clocks();
     GPIO_Config();
     TIM1_Init();
+    TIM2_Init();
     EXTI_Config();
     SysTick_Init();
 
@@ -49,6 +49,7 @@ int main(void) {
 void Enable_Clocks(void){
     /* Enable TIM1, GPIOC  and GPIOA clock */
     RCC->APB2ENR |= RCC_APB2ENR_TIM1EN | RCC_APB2ENR_IOPAEN | RCC_APB2ENR_IOPCEN | RCC_APB2ENR_AFIOEN;
+    RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
 }
 
 /**
@@ -62,7 +63,7 @@ void EXTI_Config(void){
     //AFIO->EXTICR[1] &= ~AFIO_EXTICR2_EXTI4;
     AFIO->EXTICR[1] &= ~(AFIO_EXTICR2_EXTI5 | AFIO_EXTICR2_EXTI6);
     EXTI->IMR |= EXTI_IMR_IM5 | EXTI_IMR_IM6;
-    //NVIC_SetPriority(EXTI3_IRQn, 2);
+    NVIC_SetPriority(EXTI9_5_IRQn, 1);
     NVIC_EnableIRQ(EXTI9_5_IRQn);
     //NVIC_EnableIRQ(EXTI4_IRQn);
 }

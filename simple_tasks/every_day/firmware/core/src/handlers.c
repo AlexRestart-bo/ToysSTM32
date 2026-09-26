@@ -28,6 +28,14 @@ void TIM1_UP_IRQHandler(void){
         eventPressingHandler(&button2_handler, (uint32_t*)&GPIOA->IDR, (uint32_t*)&GPIOA->ODR, GPIO_IDR_IDR6, GPIO_ODR_ODR1);
 }
 
+void TIM2_IRQHandler(void){
+    TIM2->SR &= ~TIM_SR_UIF;
+    //waiting_microseconds(100'000);
+    volatile int i = 0;
+    for (; i < 200'000'000; i++);
+    GPIOC->ODR ^= GPIO_ODR_ODR13;
+}
+
 /* First button (to PA3) has been pressed */
 void EXTI3_IRQHandler(void){
     if(EXTI->PR & EXTI_PR_PR3){
