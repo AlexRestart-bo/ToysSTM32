@@ -20,12 +20,21 @@ static void run_lights(void);
 volatile bool button1_event = false;
 volatile bool button2_event = false;
 
+void change_duty_cycle(buttonOrders btn){
+    if(btn == FIRST){
+        if(press_count.fronts[btn] > FULL_DUTY) press_count.fronts[btn] = FULL_DUTY;
+
+        TIM3->CCR3 = (press_count.fronts[btn] * ARR_VALUE_TIM3 / FULL_DUTY) - 1;
+    }
+}
+
 int main(void) {
     RCC_config();
     Enable_Clocks();
     GPIO_Config();
     TIM1_Init();
     TIM2_Init();
+    TIM3_Init();
     EXTI_Config();
     SysTick_Init();
 
@@ -43,13 +52,18 @@ int main(void) {
             //button_check(&GPIOA->IDR, &GPIOA->ODR, GPIO_IDR_IDR4, GPIO_ODR_ODR1);
             
         //}
+        if(press_count.from_buttons[button1_handler.name].front){
+            press_count.from_buttons[button1_handler.name].front = false;
+            change_duty_cycle(FIRST);
+            //TIM3->CCR3 = (press_count.fronts[FIRST] * ARR_VALUE_TIM3 / FULL_DUTY) - 1;
+        }
     }
 }
 
 void Enable_Clocks(void){
     /* Enable TIM1, GPIOC  and GPIOA clock */
-    RCC->APB2ENR |= RCC_APB2ENR_TIM1EN | RCC_APB2ENR_IOPAEN | RCC_APB2ENR_IOPCEN | RCC_APB2ENR_AFIOEN;
-    RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
+    RCC->APB2ENR |= RCC_APB2ENR_TIM1EN | RCC_APB2ENR_IOPAEN | RCC_APB2ENR_IOPBEN | RCC_APB2ENR_IOPCEN | RCC_APB2ENR_AFIOEN;
+    RCC->APB1ENR |= RCC_APB1ENR_TIM2EN | RCC_APB1ENR_TIM3EN;
 }
 
 /**
@@ -100,6 +114,10 @@ void GPIO_Config(void){
     GPIOA->CRL &= ~(GPIO_CRL_MODE6 | GPIO_CRL_CNF6);
     GPIOA->CRL |= GPIO_CRL_CNF6_1;
     GPIOA->ODR |= GPIO_ODR_ODR6;
+    //PB0   -   PWM
+    GPIOB->CRL &= ~(GPIO_CRL_MODE0 | GPIO_CRL_CNF0);
+    GPIOB->CRL |= GPIO_CRL_MODE0 | GPIO_CRL_CNF0_1;
+    AFIO->MAPR &= ~AFIO_MAPR_TIM3_REMAP;    // PB0 <-> TIM3_CH3
 
 }
 

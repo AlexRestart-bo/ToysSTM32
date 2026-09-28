@@ -1,7 +1,8 @@
 #include "main.h"
 
-buttonHandler button1_handler = {0, 0, 0, DELAY_FOR_RATTLE_MS, OFF, nothing};
-buttonHandler button2_handler = {0, 0, 0, DELAY_FOR_RATTLE_MS, OFF, nothing};
+pressingCounter press_count = {0};
+buttonHandler button1_handler = {0, 0, DELAY_FOR_RATTLE_MS, 0, OFF, nothing, false, FIRST};
+buttonHandler button2_handler = {0, 0, DELAY_FOR_RATTLE_MS, 0, OFF, nothing, false, SECOND};
 
 /**
  * @brief Delays the program by microseconds

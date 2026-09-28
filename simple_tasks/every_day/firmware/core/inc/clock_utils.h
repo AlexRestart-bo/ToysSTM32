@@ -14,7 +14,39 @@
 #define DELAY_FOR_RATTLE_MS 10      /* Miliseconds */
 #define CHECKING_TIMES 4            /* Every event from a button is checked four times */
 
+#define MAX_NUMBER_OF_BUTTONS 30
+#define FULL_DUTY 10                /* Duty cycle is divided by FULL_DUTY parts, every step adds (1/FULL_DUTY)*100% to PWM duty */
+
 typedef enum {OFF = 0, ON = 1} ButtonStatus;
+
+typedef struct  {
+    bool front;
+    bool decline;
+} somethingCome;
+
+/**
+ * @brief Every front and decline records to corresponding counter:
+ * @example front[button_number]++ if button is pressed and decline[button_number]++ if button isn't pressed
+ */
+typedef struct {
+    uint8_t fronts[MAX_NUMBER_OF_BUTTONS];
+    uint8_t declines[MAX_NUMBER_OF_BUTTONS];
+    somethingCome from_buttons[MAX_NUMBER_OF_BUTTONS];
+} pressingCounter;
+
+/**
+ * @brief A set of available buttons
+ * @note Some isn't used
+ */
+typedef enum {
+    FIRST   =   0,
+    SECOND  =   1,
+    THIRD   =   2,
+    FOURTH  =   3,
+    FIFTH   =   4,
+    SIXTH   =   5
+} buttonOrders;
+
 /**
  * @brief Stores variables for handling of a button pressing
  * @note Delay time is expressed in miliseconds and demands a corresponding configuration TIM1.
@@ -28,8 +60,10 @@ typedef struct {
     ButtonStatus status;            /* Is it turned OFF or ON */
     enum lock {wantON = 0, wantOFF = 1, nothing = 2} lock_type;  /* A lock for cheching one condition */
     bool ischanged;                 /* It's possibly the status was changed */
+    buttonOrders name;              /* Serial number of the button */
 } buttonHandler;
 
+extern pressingCounter press_count;
 extern buttonHandler button1_handler;
 extern buttonHandler button2_handler;
 

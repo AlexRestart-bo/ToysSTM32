@@ -22,3 +22,16 @@ void TIM2_Init(void){
     NVIC_SetPriority(TIM2_IRQn, 3);
     NVIC_EnableIRQ(TIM2_IRQn);
 }
+
+void TIM3_Init(void){
+    TIM3->ARR = ARR_VALUE_TIM3 - 1;
+    TIM3->PSC = PSC_VALUE_TIM3 - 1;
+    TIM3->CCR3 = ARR_VALUE_TIM3/2 - 1;     // Duty cycle is 0 at the beginning
+    TIM3->CCMR2 &= ~TIM_CCMR2_OC3M;     // Third channel is TIM3_CH3
+    TIM3->CCMR2 |= TIM_CCMR2_OC3M_2 | TIM_CCMR2_OC3M_1;     // PWM mode 1 (upcounting)
+    TIM3->CCMR2 |= TIM_CCMR2_OC3PE;
+    TIM3->CCER |= TIM_CCER_CC3E;    /* Turn OC3 signal on */
+    TIM3->CR1 |= TIM_CR1_ARPE;  /* Enable auto-reload preload */
+    TIM3->EGR |= TIM_EGR_UG;    /* Reset counter */
+    TIM3->CR1 |= TIM_CR1_CEN;
+}

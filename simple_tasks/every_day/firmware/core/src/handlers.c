@@ -96,7 +96,9 @@ static void eventPressingHandler(buttonHandler* btn, uint32_t* button_reg, uint3
             if (!READ_BIT(*button_reg, button_bit)){
                 if(btn->efforts >= CHECKING_TIMES){  /* A few times later state is changed if upper condition has been rigth for all time */
                     SET_BIT(*led_reg, led_bit);
+                    press_count.fronts[btn->name] = (press_count.fronts[btn->name] + 1) % (FULL_DUTY + 1);  /* Includes 100% duty cycle: 10 % 11 = 10 for example */
                     btn->status = ON;    /* It gets permition, because it has always confirmed this state */
+                    press_count.from_buttons[btn->name].front = true;   /* Something has came */
                     
                     btn->efforts = 0;
                     btn->lock_type = nothing;    /* Handling a rattle is completed */
@@ -115,7 +117,9 @@ static void eventPressingHandler(buttonHandler* btn, uint32_t* button_reg, uint3
             if (READ_BIT(*button_reg, button_bit)){
                 if(btn->efforts >= CHECKING_TIMES){  /* A few times later state is changed if upper condition has been rigth for all time */
                     CLEAR_BIT(*led_reg, led_bit);
+                    press_count.declines[btn->name] = (press_count.declines[btn->name] + 1) % (FULL_DUTY + 1);  /* Includes 100% duty cycle: 10 % 11 = 10 for example */
                     btn->status = OFF;    /* It gets permition, because it has always confirmed this state */
+                    press_count.from_buttons[btn->name].decline = true;
                     
                     btn->efforts = 0;
                     btn->lock_type = nothing;    /* Handling a rattle is completed */

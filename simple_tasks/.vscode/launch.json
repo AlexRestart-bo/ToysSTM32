@@ -1,0 +1,21 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "STM32 Debug",
+            "type": "cortex-debug",
+            "request": "launch",
+
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceFolder}/every_day/firmware/build/firmware.elf",
+
+            "servertype": "stutil",
+            "serverpath": "st-util",
+
+            "device": "STM32F103C8Tx",
+            "interface": "swd",
+
+            "runToEntryPoint": "main"
+        }
+    ]
+}
