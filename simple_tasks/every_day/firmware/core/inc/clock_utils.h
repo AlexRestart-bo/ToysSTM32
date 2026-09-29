@@ -15,7 +15,7 @@
 #define CHECKING_TIMES 4            /* Every event from a button is checked four times */
 
 #define MAX_NUMBER_OF_BUTTONS 30
-#define FULL_DUTY 10                /* Duty cycle is divided by FULL_DUTY parts, every step adds (1/FULL_DUTY)*100% to PWM duty */
+#define FULL_DUTY 5                /* Duty cycle is divided by FULL_DUTY parts, every step adds (1/FULL_DUTY)*100% to PWM duty */
 
 typedef enum {OFF = 0, ON = 1} ButtonStatus;
 

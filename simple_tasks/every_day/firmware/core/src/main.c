@@ -20,12 +20,25 @@ static void run_lights(void);
 volatile bool button1_event = false;
 volatile bool button2_event = false;
 
+/**
+ * @brief Changes duty cycles for outputs that is configured as PWM
+ * 
+ * @param btn Order of the button, it contans in buttonOrders enumeration
+ * @note Second button has been configured with opposite polarity in relation to first button
+ * @warning Be careful! Type overflow can sping up
+ */
 void change_duty_cycle(buttonOrders btn){
-    if(btn == FIRST){
-        if(press_count.fronts[btn] > FULL_DUTY) press_count.fronts[btn] = FULL_DUTY;
+    if(press_count.fronts[btn] > FULL_DUTY) press_count.fronts[btn] = FULL_DUTY;
 
-        TIM3->CCR3 = (press_count.fronts[btn] * ARR_VALUE_TIM3 / FULL_DUTY) - 1;
+    uint16_t CCR_value = (uint16_t)(press_count.fronts[btn] * ARR_VALUE_TIM3 / FULL_DUTY);
+    uint16_t max_CCR = ARR_VALUE_TIM3;
+
+    if(btn == FIRST){
+        TIM3->CCR3 = CCR_value;
+        TIM3->CCR4 = max_CCR - CCR_value;
     }
+    //else if(btn == SECOND)
+        //TIM3->CCR4 = (uint16_t)(press_count.fronts[btn] * ARR_VALUE_TIM3 / FULL_DUTY);
 }
 
 int main(void) {
@@ -52,11 +65,17 @@ int main(void) {
             //button_check(&GPIOA->IDR, &GPIOA->ODR, GPIO_IDR_IDR4, GPIO_ODR_ODR1);
             
         //}
+        // First button
         if(press_count.from_buttons[button1_handler.name].front){
             press_count.from_buttons[button1_handler.name].front = false;
             change_duty_cycle(FIRST);
-            //TIM3->CCR3 = (press_count.fronts[FIRST] * ARR_VALUE_TIM3 / FULL_DUTY) - 1;
         }
+        // Second button
+        /*
+        if(press_count.from_buttons[button2_handler.name].front){
+            press_count.from_buttons[button2_handler.name].front = false;
+            change_duty_cycle(SECOND);
+        }*/
     }
 }
 
@@ -118,7 +137,9 @@ void GPIO_Config(void){
     GPIOB->CRL &= ~(GPIO_CRL_MODE0 | GPIO_CRL_CNF0);
     GPIOB->CRL |= GPIO_CRL_MODE0 | GPIO_CRL_CNF0_1;
     AFIO->MAPR &= ~AFIO_MAPR_TIM3_REMAP;    // PB0 <-> TIM3_CH3
-
+    //PB1   -   PWM reverse from PB0
+    GPIOB->CRL &= ~(GPIO_CRL_MODE1 | GPIO_CRL_CNF1);    // PB0 <-> TIM3_CH4
+    GPIOB->CRL |= GPIO_CRL_MODE1 | GPIO_CRL_CNF0_1;
 }
 
 void SysTick_Init(void){

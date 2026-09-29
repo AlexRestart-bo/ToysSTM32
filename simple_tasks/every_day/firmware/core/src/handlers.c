@@ -31,8 +31,8 @@ void TIM1_UP_IRQHandler(void){
 void TIM2_IRQHandler(void){
     TIM2->SR &= ~TIM_SR_UIF;
     //waiting_microseconds(100'000);
-    volatile int i = 0;
-    for (; i < 200'000'000; i++);
+    //volatile int i = 0;
+    //for (; i < 200'000'000; i++);
     GPIOC->ODR ^= GPIO_ODR_ODR13;
 }
 
