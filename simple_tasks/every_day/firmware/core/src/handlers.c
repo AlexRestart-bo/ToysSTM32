@@ -36,6 +36,10 @@ void TIM2_IRQHandler(void){
     GPIOC->ODR ^= GPIO_ODR_ODR13;
 }
 
+void TIM4_IRQHandler(void){
+    tim4_ticks++;
+}
+
 /* First button (to PA3) has been pressed */
 void EXTI3_IRQHandler(void){
     if(EXTI->PR & EXTI_PR_PR3){

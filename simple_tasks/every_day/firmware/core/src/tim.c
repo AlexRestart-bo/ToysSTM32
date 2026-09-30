@@ -1,5 +1,7 @@
 #include "main.h"
 
+unsigned long long tim4_ticks = 0;
+
 void TIM1_Init(void){       // 1 kHz
     TIM1->ARR = ARR_VALUE - 1;
     TIM1->PSC = PSC_VALUE - 1;
@@ -7,7 +9,7 @@ void TIM1_Init(void){       // 1 kHz
     TIM1->SR &= ~TIM_SR_UIF;
     TIM1->CNT = 0;
     TIM1->CR1 = TIM_CR1_CEN;
-    NVIC_SetPriority(TIM1_UP_IRQn, 2);
+    NVIC_SetPriority(TIM1_UP_IRQn, 3);
     NVIC_EnableIRQ(TIM1_UP_IRQn);
 }
 
@@ -18,8 +20,8 @@ void TIM2_Init(void){
     TIM2->SR &= ~TIM_SR_UIF;
     TIM2->CNT = 0;
     TIM2->CR1 = TIM_CR1_CEN;
-    NVIC_SetPriorityGrouping(2);
-    NVIC_SetPriority(TIM2_IRQn, 3);
+    NVIC_SetPriorityGrouping(3);
+    NVIC_SetPriority(TIM2_IRQn, 4);
     NVIC_EnableIRQ(TIM2_IRQn);
 }
 
@@ -36,9 +38,21 @@ void TIM3_Init(void){
     TIM3->CCR4 = 0;
     TIM3->CCMR2 &= ~TIM_CCMR2_OC4M;     // Fourth channel is TIM3_CH4
     TIM3->CCMR2 |= TIM_CCMR2_OC4M_2 | TIM_CCMR2_OC4M_1 | TIM_CCMR2_OC4PE;
-    TIM3->CCER |= TIM_CCER_CC4E; //| TIM_CCER_CC4P;    // Invertion refers to TIM3_CH3
+    TIM3->CCER |= TIM_CCER_CC4E | TIM_CCER_CC4P;    // Invertion refers to TIM3_CH3
 
     TIM3->CR1 |= TIM_CR1_ARPE;  /* Enable auto-reload preload */
     TIM3->EGR |= TIM_EGR_UG;    /* Reset counter */
     TIM3->CR1 |= TIM_CR1_CEN;
+}
+
+void TIM4_Init(void){
+    TIM4->ARR = ARR_VALUE_TIM4;
+    TIM4->PSC = PSC_VALUE_TIM4;
+    TIM4->DIER = TIM_DIER_UIE;
+    TIM4->SR &= ~TIM_SR_UIF;
+    TIM4->CNT = 0;
+    TIM4->EGR |= TIM_EGR_UG;
+    TIM4->CR1 = TIM_CR1_CEN;
+    NVIC_SetPriority(TIM4_IRQn, 1);
+    NVIC_EnableIRQ(TIM4_IRQn);
 }

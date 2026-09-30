@@ -35,7 +35,7 @@ void change_duty_cycle(buttonOrders btn){
 
     if(btn == FIRST){
         TIM3->CCR3 = CCR_value;
-        TIM3->CCR4 = max_CCR - CCR_value;
+        TIM3->CCR4 = CCR_value;     /* Opposite mode has been configured by CC4P bit */
     }
     //else if(btn == SECOND)
         //TIM3->CCR4 = (uint16_t)(press_count.fronts[btn] * ARR_VALUE_TIM3 / FULL_DUTY);
@@ -48,6 +48,7 @@ int main(void) {
     TIM1_Init();
     TIM2_Init();
     TIM3_Init();
+    TIM4_Init();
     EXTI_Config();
     SysTick_Init();
 
@@ -82,7 +83,7 @@ int main(void) {
 void Enable_Clocks(void){
     /* Enable TIM1, GPIOC  and GPIOA clock */
     RCC->APB2ENR |= RCC_APB2ENR_TIM1EN | RCC_APB2ENR_IOPAEN | RCC_APB2ENR_IOPBEN | RCC_APB2ENR_IOPCEN | RCC_APB2ENR_AFIOEN;
-    RCC->APB1ENR |= RCC_APB1ENR_TIM2EN | RCC_APB1ENR_TIM3EN;
+    RCC->APB1ENR |= RCC_APB1ENR_TIM2EN | RCC_APB1ENR_TIM3EN | RCC_APB1ENR_TIM4EN;
 }
 
 /**
@@ -96,7 +97,7 @@ void EXTI_Config(void){
     //AFIO->EXTICR[1] &= ~AFIO_EXTICR2_EXTI4;
     AFIO->EXTICR[1] &= ~(AFIO_EXTICR2_EXTI5 | AFIO_EXTICR2_EXTI6);
     EXTI->IMR |= EXTI_IMR_IM5 | EXTI_IMR_IM6;
-    NVIC_SetPriority(EXTI9_5_IRQn, 1);
+    NVIC_SetPriority(EXTI9_5_IRQn, 2);
     NVIC_EnableIRQ(EXTI9_5_IRQn);
     //NVIC_EnableIRQ(EXTI4_IRQn);
 }
@@ -139,7 +140,7 @@ void GPIO_Config(void){
     AFIO->MAPR &= ~AFIO_MAPR_TIM3_REMAP;    // PB0 <-> TIM3_CH3
     //PB1   -   PWM reverse from PB0
     GPIOB->CRL &= ~(GPIO_CRL_MODE1 | GPIO_CRL_CNF1);    // PB0 <-> TIM3_CH4
-    GPIOB->CRL |= GPIO_CRL_MODE1 | GPIO_CRL_CNF0_1;
+    GPIOB->CRL |= GPIO_CRL_MODE1 | GPIO_CRL_CNF1_1;
 }
 
 void SysTick_Init(void){
