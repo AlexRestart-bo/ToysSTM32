@@ -1,6 +1,6 @@
 #include "main.h"
 
-unsigned long long tim4_ticks = 0;
+volatile unsigned long long tim4_ticks = 0;
 
 void TIM1_Init(void){       // 1 kHz
     TIM1->ARR = ARR_VALUE - 1;
@@ -20,7 +20,6 @@ void TIM2_Init(void){
     TIM2->SR &= ~TIM_SR_UIF;
     TIM2->CNT = 0;
     TIM2->CR1 = TIM_CR1_CEN;
-    NVIC_SetPriorityGrouping(3);
     NVIC_SetPriority(TIM2_IRQn, 4);
     NVIC_EnableIRQ(TIM2_IRQn);
 }
@@ -46,13 +45,14 @@ void TIM3_Init(void){
 }
 
 void TIM4_Init(void){
-    TIM4->ARR = ARR_VALUE_TIM4;
-    TIM4->PSC = PSC_VALUE_TIM4;
-    TIM4->DIER = TIM_DIER_UIE;
-    TIM4->SR &= ~TIM_SR_UIF;
+    TIM4->ARR = ARR_VALUE_TIM4 - 1;
+    TIM4->PSC = PSC_VALUE_TIM4 - 1;
     TIM4->CNT = 0;
+    TIM4->SR &= ~TIM_SR_UIF;
+    TIM4->DIER = TIM_DIER_UIE;
+
     TIM4->EGR |= TIM_EGR_UG;
-    TIM4->CR1 = TIM_CR1_CEN;
     NVIC_SetPriority(TIM4_IRQn, 1);
     NVIC_EnableIRQ(TIM4_IRQn);
+    TIM4->CR1 = TIM_CR1_CEN;
 }

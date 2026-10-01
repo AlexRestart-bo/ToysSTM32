@@ -53,11 +53,17 @@ int waiting_microseconds(unsigned int mcs){
     return 0;
 }
 
-/*
-int delay_by_tim1(unsigned int ms){
-
+/**
+ * @brief Uses TIM4 for waiting
+ * 
+ * @param ms time for delay in miliseconds must be less than MAX_ULL (~585 million years)
+ * @return int 
+ */
+int delay_by_tim4(unsigned int ms){
+    uint64_t current_tick = tim4_ticks;
+    while(tim4_ticks - current_tick < ms);
+    return 0;
 }
-*/
 
 /**
  * @brief Turns LED (PA2) on if button is pressed

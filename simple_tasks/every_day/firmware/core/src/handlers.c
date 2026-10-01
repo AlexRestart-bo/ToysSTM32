@@ -29,15 +29,18 @@ void TIM1_UP_IRQHandler(void){
 }
 
 void TIM2_IRQHandler(void){
-    TIM2->SR &= ~TIM_SR_UIF;
-    //waiting_microseconds(100'000);
-    //volatile int i = 0;
-    //for (; i < 200'000'000; i++);
-    GPIOC->ODR ^= GPIO_ODR_ODR13;
+    if(READ_BIT(TIM2->SR, TIM_SR_UIF)){
+        CLEAR_BIT(TIM2->SR, TIM_SR_UIF);
+        //waiting_microseconds(100'000);
+        //GPIOC->ODR ^= GPIO_ODR_ODR13;
+    }
 }
 
 void TIM4_IRQHandler(void){
-    tim4_ticks++;
+    if(TIM4->SR & TIM_SR_UIF){
+        TIM4->SR &= ~TIM_SR_UIF;
+        tim4_ticks++;
+    }
 }
 
 /* First button (to PA3) has been pressed */

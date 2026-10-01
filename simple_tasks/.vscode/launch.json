@@ -13,9 +13,7 @@
             "serverpath": "st-util",
 
             "device": "STM32F103C8Tx",
-            "interface": "swd",
-
-            "runToEntryPoint": "main"
+            "interface": "swd"
         }
     ]
 }

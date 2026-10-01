@@ -20,8 +20,8 @@
 typedef enum {OFF = 0, ON = 1} ButtonStatus;
 
 typedef struct  {
-    bool front;
-    bool decline;
+    volatile bool front;
+    volatile bool decline;
 } somethingCome;
 
 /**
@@ -29,8 +29,8 @@ typedef struct  {
  * @example front[button_number]++ if button is pressed and decline[button_number]++ if button isn't pressed
  */
 typedef struct {
-    uint8_t fronts[MAX_NUMBER_OF_BUTTONS];
-    uint8_t declines[MAX_NUMBER_OF_BUTTONS];
+    volatile uint8_t fronts[MAX_NUMBER_OF_BUTTONS];
+    volatile uint8_t declines[MAX_NUMBER_OF_BUTTONS];
     somethingCome from_buttons[MAX_NUMBER_OF_BUTTONS];
 } pressingCounter;
 
@@ -53,14 +53,14 @@ typedef enum {
  *  It uses TIM1 for doing a delay.
  */
 typedef struct {
-    unsigned char efforts;          /* Quantity times when button was checked */
-    unsigned char retentions;       /* Quantity statuses when button is pressed */
-    unsigned int delay_time;        /* Duration of a delay between checkings (in miliseconds) */
-    unsigned int ticks;             /* Every miliseconds increments this variable */
-    ButtonStatus status;            /* Is it turned OFF or ON */
-    enum lock {wantON = 0, wantOFF = 1, nothing = 2} lock_type;  /* A lock for cheching one condition */
-    bool ischanged;                 /* It's possibly the status was changed */
-    buttonOrders name;              /* Serial number of the button */
+    volatile unsigned char efforts;          /* Quantity times when button was checked */
+    volatile unsigned char retentions;       /* Quantity statuses when button is pressed */
+    volatile unsigned int delay_time;        /* Duration of a delay between checkings (in miliseconds) */
+    volatile unsigned int ticks;             /* Every miliseconds increments this variable */
+    volatile ButtonStatus status;            /* Is it turned OFF or ON */
+    volatile enum lock {wantON = 0, wantOFF = 1, nothing = 2} lock_type;  /* A lock for cheching one condition */
+    volatile bool ischanged;                 /* It's possibly the status was changed */
+    volatile buttonOrders name;              /* Serial number of the button */
 } buttonHandler;
 
 extern pressingCounter press_count;
@@ -75,6 +75,14 @@ extern buttonHandler button2_handler;
  * @note It is not related to interruptions and does not affect their operation
  */
 int waiting_microseconds(unsigned int mcs);
+
+/**
+ * @brief Uses TIM4 for waiting
+ * 
+ * @param ms time for delay in miliseconds must be less than MAX_ULL (~585 million years)
+ * @return int 
+ */
+int delay_by_tim4(unsigned int ms);
 
 void button_check(uint32_t* button_reg, uint32_t* led_reg, uint32_t button_bit, uint32_t led_bit);
 

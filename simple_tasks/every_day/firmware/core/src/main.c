@@ -31,7 +31,7 @@ void change_duty_cycle(buttonOrders btn){
     if(press_count.fronts[btn] > FULL_DUTY) press_count.fronts[btn] = FULL_DUTY;
 
     uint16_t CCR_value = (uint16_t)(press_count.fronts[btn] * ARR_VALUE_TIM3 / FULL_DUTY);
-    uint16_t max_CCR = ARR_VALUE_TIM3;
+    //uint16_t max_CCR = ARR_VALUE_TIM3;
 
     if(btn == FIRST){
         TIM3->CCR3 = CCR_value;
@@ -53,8 +53,8 @@ int main(void) {
     SysTick_Init();
 
     while(1){
-        //waiting_microseconds(1'000'000);
-        //GPIOC->ODR ^= GPIO_ODR_ODR13;
+        delay_by_tim4(1000);
+        GPIOC->ODR ^= GPIO_ODR_ODR13;
         //run_lights();
         //if (button1_event){      /* good approach for handling a pressing the button */
         //    button1_event = false;

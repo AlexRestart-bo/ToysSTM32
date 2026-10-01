@@ -7,10 +7,12 @@
 #define PSC_VALUE_TIM2 36000     /* Timer prescaler for TIM2 */
 #define ARR_VALUE_TIM3 1000
 #define PSC_VALUE_TIM3 36
-#define ARR_VALUE_TIM4 1    /* 36 MHz / 36 = 1 MHz, period = 1 microsecond */
+#define ARR_VALUE_TIM4 1000    /* 36 MHz / 36 = 1 MHz, period = 1 microsecond */
 #define PSC_VALUE_TIM4 36
 
-extern unsigned long long tim4_ticks;
+#define MAX_ULL 0XFFFF'FFFF'FFFF'FFFFull    /* (unsigned long long)18446744073709551615ULL */
+
+extern volatile unsigned long long tim4_ticks;
 
 void TIM1_Init(void);
 void TIM2_Init(void);
