@@ -53,8 +53,8 @@ int main(void) {
     SysTick_Init();
 
     while(1){
-        delay_by_tim4(1000);
-        GPIOC->ODR ^= GPIO_ODR_ODR13;
+        //delay_by_tim4(1000);
+        //GPIOC->ODR ^= GPIO_ODR_ODR13;
         //run_lights();
         //if (button1_event){      /* good approach for handling a pressing the button */
         //    button1_event = false;
@@ -70,6 +70,8 @@ int main(void) {
         if(press_count.from_buttons[button1_handler.name].front){
             press_count.from_buttons[button1_handler.name].front = false;
             change_duty_cycle(FIRST);
+            if(!READ_BIT(TIM2->CR1, TIM_CR1_CEN))
+                SET_BIT(TIM2->CR1, TIM_CR1_CEN);
         }
         // Second button
         /*
@@ -118,9 +120,10 @@ void GPIO_Config(void){
     // PA2  -   YELLOW LED
     GPIOA->CRL &= ~(GPIO_CRL_MODE2 | GPIO_CRL_CNF2);
     GPIOA->CRL |= GPIO_CRL_MODE2_1;
-    // PA3
-    //GPIOA->CRL &= ~(GPIO_CRL_MODE3 | GPIO_CRL_CNF3);
-    //GPIOA->CRL |= GPIO_CRL_CNF3_1;      // Input mode
+    // PA3 - TIM2_CH4
+    GPIOA->CRL &= ~(GPIO_CRL_MODE3 | GPIO_CRL_CNF3);
+    GPIOA->CRL |= GPIO_CRL_MODE3 | GPIO_CRL_CNF3_1;      // Alternate function, output 
+    AFIO->MAPR &= ~AFIO_MAPR_TIM2_REMAP;    // no remap PA3 <-> TIM2_CH4
     //GPIOA->ODR |= GPIO_ODR_ODR3;        // pull-up
     // PA4
     //GPIOA->CRL &= ~(GPIO_CRL_MODE4 | GPIO_CRL_CNF4);

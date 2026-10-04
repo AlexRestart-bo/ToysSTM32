@@ -1,5 +1,7 @@
 #include "main.h"
 
+#define POINT_PULSE 100     /* The value for TIM2->CCRx register must be less than ARR_VALUE_TIM2 and more than 0 */
+
 volatile unsigned long long tim4_ticks = 0;
 
 void TIM1_Init(void){       // 1 kHz
@@ -16,12 +18,14 @@ void TIM1_Init(void){       // 1 kHz
 void TIM2_Init(void){
     TIM2->ARR = ARR_VALUE_TIM2 - 1;
     TIM2->PSC = PSC_VALUE_TIM2 - 1;
-    TIM2->DIER = TIM_DIER_UIE;
-    TIM2->SR &= ~TIM_SR_UIF;
+
+    TIM2->CCR4 = POINT_PULSE;
+    TIM2->CCMR2 |= TIM_CCMR2_OC4M | TIM_CCMR2_OC4PE;        /* Need PWM mode 2, because it's high if CNT < CCRx */
+    TIM2->CCER |= TIM_CCER_CC4E;
+
     TIM2->CNT = 0;
-    TIM2->CR1 = TIM_CR1_CEN;
-    NVIC_SetPriority(TIM2_IRQn, 4);
-    NVIC_EnableIRQ(TIM2_IRQn);
+    TIM2->CR1 |= TIM_CR1_OPM | TIM_CR1_ARPE;    /* One pulse mode and auto-reload preload enable */
+    TIM2->EGR |= TIM_EGR_UG;
 }
 
 void TIM3_Init(void){
