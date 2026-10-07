@@ -36,7 +36,7 @@ typedef struct {
 
 /**
  * @brief A set of available buttons
- * @note Some isn't used
+ * @note Some isn't busy
  */
 typedef enum {
     FIRST   =   0,

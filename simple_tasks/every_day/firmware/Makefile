@@ -1,3 +1,7 @@
+# Module
+MODULE ?= m1
+
+
 # Toolchain
 PREFIX = arm-none-eabi-
 CC = $(PREFIX)gcc
@@ -14,7 +18,15 @@ OPT = -Og
 
 # Paths
 ROOT = .
-CORE = $(ROOT)/core
+
+ifeq($(MODULE), m1)
+	CORE = $(ROOT)/step1
+else ifeq($(MODULE), m2)
+	CORE = $(ROOT)/step2
+else
+	$(error Error: unknown module - $(MODULE))
+endif
+
 DRIV = $(ROOT)/drivers
 
 # Source files
@@ -45,6 +57,14 @@ LDFLAGS = $(MCU) -T"$(DRIV)/STM32F103C8TX_FLASH.ld" \
 # Output files
 TARGET = firmware
 BUILD_DIR = build
+
+ifeq($(MODULE), m1)
+	BUILD_DIR = build/module1
+else ifeq($(MODULE), m2)
+	BUILD_DIR = build/module2
+else
+	$(error Error: unknown module - $(MODULE))
+endif
 
 # Default target
 all: $(BUILD_DIR)/$(TARGET).bin $(BUILD_DIR)/$(TARGET).hex
@@ -87,4 +107,8 @@ flash: $(BUILD_DIR)/$(TARGET).bin
 debug:
 	$(DB) $(BUILD_DIR)/$(TARGET).elf
 
-.PHONY: all clean flash
+help:
+	@echo "There are many modules. You can define it to set 'MODULE' variable:"
+	@echo "  m1 or m2 "
+
+.PHONY: all clean flash help
