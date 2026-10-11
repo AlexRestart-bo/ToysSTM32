@@ -20,13 +20,7 @@
 #include "stm32f103xb.h"
 #include "system_stm32f1xx.h"
 
-/* From other module */
-#define MICROINSEC 1000000      /* Number microseconds in a second */
-#define MILIINSEC 1000          /* Number miliseconds in a second */
-#define SYSTICK_TICKS_PER_US (BOARD_SYSCLK/MICROINSEC)      /* Ticks per microsecond (72) */
-#define SYSTICK_TICKS_PER_MS (BOARD_SYSCLK/MILIINSEC)       /* Ticks per milisecond (72000) */
-
-#define AVG_SLOPE 4.3       /* Average slope */
+#define AVG_SLOPE (4.3 * 0.001)       /* Average slope in V */
 #define PRIMARY_TEMP 25     /* Start temperature for beginning measurements */
 #define PRIMARY_VOLT 1.43   /* Voltage at 25 °C */
 

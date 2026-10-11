@@ -1,5 +1,5 @@
 # Module
-MODULE ?= m1
+MODULE ?= m2
 
 
 # Toolchain
@@ -13,15 +13,15 @@ DB = $(PREFIX)gdb
 # Microcontroller
 MCU = -mcpu=cortex-m3 -mthumb
 
-# Optimization
-OPT = -Og
+# Optimization for debugging
+OPT = -O0 # -Og
 
 # Paths
 ROOT = .
 
-ifeq($(MODULE), m1)
+ifeq ($(MODULE), m1)
 	CORE = $(ROOT)/step1
-else ifeq($(MODULE), m2)
+else ifeq ($(MODULE), m2)
 	CORE = $(ROOT)/step2
 else
 	$(error Error: unknown module - $(MODULE))
@@ -42,7 +42,7 @@ INCLUDE_DIRS = $(DRIV)/inc $(CORE)/inc
 C_INCLUDES = $(foreach d, $(INCLUDE_DIRS), -I$(d))
 
 # Compiler flags
-CFLAGS = $(MCU) $(OPT) -std=gnu23 \
+CFLAGS = $(MCU) $(OPT) -g -std=gnu23 \
 -DSTM32F103xB \
 $(C_INCLUDES) \
 -ffunction-sections -fdata-sections \
@@ -58,9 +58,9 @@ LDFLAGS = $(MCU) -T"$(DRIV)/STM32F103C8TX_FLASH.ld" \
 TARGET = firmware
 BUILD_DIR = build
 
-ifeq($(MODULE), m1)
+ifeq ($(MODULE), m1)
 	BUILD_DIR = build/module1
-else ifeq($(MODULE), m2)
+else ifeq ($(MODULE), m2)
 	BUILD_DIR = build/module2
 else
 	$(error Error: unknown module - $(MODULE))
@@ -72,6 +72,9 @@ all: $(BUILD_DIR)/$(TARGET).bin $(BUILD_DIR)/$(TARGET).hex
 # Compile C files
 OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(C_SOURCES:.c=.o)))
 vpath %.c $(sort $(dir $(C_SOURCES)))
+
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
 
 $(BUILD_DIR)/%.o: %.c | $(BUILD_DIR)
 	$(CC) -c $(CFLAGS) $< -o $@

@@ -7,7 +7,7 @@
             "request": "launch",
 
             "cwd": "${workspaceFolder}",
-            "executable": "${workspaceFolder}/every_day/firmware/build/firmware.elf",
+            "executable": "${workspaceFolder}/every_day/firmware/build/module2/firmware.elf",
 
             "servertype": "stutil",
             "serverpath": "st-util",
