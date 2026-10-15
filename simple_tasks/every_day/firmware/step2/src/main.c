@@ -18,6 +18,8 @@
  */
 #include "main.h"
 
+volatile float temperature = 0;
+
 void RCC_config(void){
     /* 2 wait states if 48 MHz < SYSCLK <= 72 MHz */
     //FLASH->ACR = FLASH_ACR_LATENCY_2;
@@ -78,23 +80,31 @@ void ADC1_Init(void){
     /* Right alignment */
     ADC1->CR2 &= ~ADC_CR2_ALIGN;
 
-    /* Enable external trigger */
+    /* Continious conversion mode */
+    ADC1->CR2 |= ADC_CR2_CONT;
+
+    /* Enable external trigger (SWSTART) */
     ADC1->CR2 |= ADC_CR2_EXTTRIG | ADC_CR2_EXTSEL;
+
+    /* Enable interrupt (the end of conversion) */
+    ADC1->CR1 |= ADC_CR1_EOCIE;
 
     /* Turn temperature sensor on and turn his power on */
     ADC1->CR2 |= ADC_CR2_TSVREFE | ADC_CR2_ADON;
 
     /* Need at least two free cycles before calibration */
-    for(volatile int i = 0; i < 1000; i++);  
-
     ADC1->CR2 |= ADC_CR2_CAL;
 
     /* Wait for the end of the calibration */
     while (READ_BIT(ADC1->CR2, ADC_CR2_CAL));
+
+    NVIC_EnableIRQ(ADC1_2_IRQn);
+
 }
 
 float get_tempsensor_value(void){
-    uint16_t data_sense = ADC1->DR & 0xFFF;    /* Get lower 12 bits (max_value = 0xFFF) */
+
+    uint16_t data_sense = ADC1->DR & 0xFFF;    /* Get lower 12 bits (max_value = 0xFFF), reading Data Register clears EOC bit in Status Register */
 
     float v_sense = 3.3 * (float)data_sense / (float)0xFFF;
 
@@ -106,19 +116,16 @@ int main(void){
     Enable_Clocks();
     ADC1_Init();
 
-    volatile float temperature = 0;
+    /* Start convertions */
+    ADC1->CR2 |= ADC_CR2_SWSTART;
 
-    while(1){
-        ADC1->CR2 |= ADC_CR2_SWSTART;
-
-        while(!READ_BIT(ADC1->SR, ADC_SR_EOC));     /* ADC_SR_EOC bit is clened after reading DR */
-
-        temperature = get_tempsensor_value();
-
-        //waiting_microseconds(1'000'000);
-        for (volatile int i = 0; i < 1'000'000; i++);
-
-    }
+    while(1);
 
     return 0;
+}
+
+void ADC1_2_IRQHandler(void){
+    if (READ_BIT(ADC1->SR, ADC_SR_EOC)){
+        temperature = get_tempsensor_value(); /* ADC_SR_EOC bit is clened after reading DR */
+    }
 }
