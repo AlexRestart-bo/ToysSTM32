@@ -20,8 +20,19 @@
 #include "stm32f103xb.h"
 #include "system_stm32f1xx.h"
 
-#define AVG_SLOPE (4.3 * 0.001)       /* Average slope in V */
-#define PRIMARY_TEMP 25     /* Start temperature for beginning measurements */
-#define PRIMARY_VOLT 1.43   /* Voltage at 25 °C */
+#define AVG_SLOPE (4.3f * 0.001f)   /* Average slope in V */
+#define PRIMARY_TEMP 25.0f          /* Start temperature for beginning measurements */
+#define PRIMARY_VOLT 1.43f          /* Voltage at 25 °C */
+
+#define SENSORS 4
+#define INPUT_TEMPSENSOR 3
+
+typedef struct {
+    volatile uint16_t sensor_readings[SENSORS];     /* Data from ADCs */
+    volatile uint8_t runner;            /* Number of a current sensor */
+    volatile uint8_t refresh_sensor;    /* An order of a sensor that value was refreshed */ 
+    volatile float sensor_values[SENSORS];  /* Real physic values */
+    volatile uint8_t new_portion;       /* New data has been handled */
+} sensorData;
 
 #endif

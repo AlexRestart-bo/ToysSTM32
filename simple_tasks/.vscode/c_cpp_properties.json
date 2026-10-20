@@ -4,6 +4,7 @@
             "name": "STM32",
             "includePath": [
                 "${workspaceFolder}/**",
+                "${workspaceFolder}/every_day/firmware/step2/inc",
                 "/usr/lib/arm-none-eabi/include",
                 "/usr/lib/gcc/arm-none-eabi/14.2.1/include"
             ],
