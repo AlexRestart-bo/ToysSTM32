@@ -28,11 +28,14 @@
 #define INPUT_TEMPSENSOR 3
 
 typedef struct {
-    volatile uint16_t sensor_readings[SENSORS];     /* Data from ADCs */
+    volatile uint16_t sensor_readings[2*SENSORS] __aligned(4);     /* Data from ADCs, it has two parts for DMA */
     volatile uint8_t runner;            /* Number of a current sensor */
     volatile uint8_t refresh_sensor;    /* An order of a sensor that value was refreshed */ 
     volatile float sensor_values[SENSORS];  /* Real physic values */
     volatile uint8_t new_portion;       /* New data has been handled */
 } sensorData;
+
+#define FREADY 1    /* First half of bufer is ready */
+#define SREADY 2    /* Second half of bufer is ready */
 
 #endif
